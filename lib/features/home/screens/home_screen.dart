@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../widgets/home_header.dart';
 import '../widgets/tiffin_categories.dart';
 import '../widgets/home_filters.dart';
 import '../widgets/food_card.dart';
 import '../widgets/floating_nav_bar.dart';
+import '../providers/home_providers.dart';
 
-class HomeScreen extends StatefulWidget {
+import '../widgets/cart_view.dart';
+import '../widgets/proceed_to_cart_bar.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool _isNavVisible = true;
 
   @override
   void initState() {
@@ -24,14 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.addListener(() {
       final direction = _scrollController.position.userScrollDirection;
       final pixels = _scrollController.position.pixels;
+      final isNavVisible = ref.read(navBarVisibilityProvider);
 
       if (direction == ScrollDirection.reverse && pixels > 50) {
-        if (_isNavVisible) {
-          setState(() => _isNavVisible = false);
+        if (isNavVisible) {
+          ref.read(navBarVisibilityProvider.notifier).state = false;
         }
       } else if (direction == ScrollDirection.forward || pixels <= 10) {
-        if (!_isNavVisible) {
-          setState(() => _isNavVisible = true);
+        if (!isNavVisible) {
+          ref.read(navBarVisibilityProvider.notifier).state = true;
         }
       }
     });
@@ -45,53 +50,65 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final foodItems = ref.watch(foodItemsProvider);
+    final isNavVisible = ref.watch(navBarVisibilityProvider);
+    final currentIndex = ref.watch(navigationIndexProvider);
+    final cartCount = ref.watch(cartCountProvider);
+
+    // Logic to decide which bottom bar to show
+    final showProceedBar = cartCount > 0 && currentIndex != 3;
+
     return AppScaffold(
-      safeArea: false, // Allows header to go behind status bar
+      safeArea: false,
       body: Stack(
         children: [
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                const HomeHeader(),
-                const SizedBox(height: 16),
-                const TiffinCategories(),
-                const SizedBox(height: 8),
-                const HomeFilters(),
-                const SizedBox(height: 8),
-                const FoodCard(
-                  title: 'Ghee Roast Idly (4 Pcs)',
-                  description:
-                      'Soft and fluffy idlies roasted in pure cow ghee, served with spicy red chutney and sambar.',
-                  price: '₹120',
-                  rating: '4.8',
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800',
-                  isFavorite: true,
-                ),
-                const FoodCard(
-                  title: 'Butter Masala Dosa',
-                  description:
-                      'Crispy golden dosa filled with spiced potato masala and topped with fresh butter.',
-                  price: '₹140',
-                  rating: '4.9',
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1630383249896-424e482df921?w=800',
-                ),
-                const FoodCard(
-                  title: 'Medu Vada (2 Pcs)',
-                  description:
-                      'Crispy deep-fried lentil donuts served with coconut chutney and piping hot sambar.',
-                  price: '₹90',
-                  rating: '4.7',
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?w=800',
-                ),
-                const SizedBox(height: 100), // Extra space for nav bar
-              ],
-            ),
+          IndexedStack(
+            index: currentIndex,
+            children: [
+              // Home Tab
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  const SliverToBoxAdapter(
+                    child: HomeHeader(),
+                  ),
+                  const SliverPadding(
+                    padding: EdgeInsets.only(top: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: TiffinCategories(),
+                    ),
+                  ),
+                  const SliverPadding(
+                    padding: EdgeInsets.only(top: 8),
+                    sliver: SliverToBoxAdapter(
+                      child: HomeFilters(),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 140),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return FoodCard(item: foodItems[index]);
+                        },
+                        childCount: foodItems.length,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // Search Tab (Placeholder)
+              const Center(child: Text('Search Content')),
+              // Orders Tab (Placeholder)
+              const Center(child: Text('Orders Content')),
+              // Cart Tab
+              const CartView(),
+            ],
           ),
-          FloatingNavBar(isVisible: _isNavVisible),
+          if (showProceedBar)
+            const ProceedToCartBar()
+          else
+            FloatingNavBar(isVisible: isNavVisible),
         ],
       ),
     );

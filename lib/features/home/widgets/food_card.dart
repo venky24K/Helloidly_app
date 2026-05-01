@@ -1,25 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../models/food_item.dart';
+import '../providers/home_providers.dart';
 
 class FoodCard extends StatefulWidget {
-  final String title;
-  final String description;
-  final String price;
-  final String rating;
-  final String imageUrl;
-  final bool isFavorite;
-  final String? deliveryTime;
-  final String? distance;
+  final FoodItem item;
 
   const FoodCard({
     super.key,
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.rating,
-    required this.imageUrl,
-    this.isFavorite = false,
-    this.deliveryTime,
-    this.distance,
+    required this.item,
   });
 
   @override
@@ -32,7 +21,7 @@ class _FoodCardState extends State<FoodCard> {
   @override
   void initState() {
     super.initState();
-    _isFavorite = widget.isFavorite;
+    _isFavorite = widget.item.isFavorite;
   }
 
   @override
@@ -64,7 +53,7 @@ class _FoodCardState extends State<FoodCard> {
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.network(
-                  widget.imageUrl,
+                  widget.item.imageUrl,
                   height: 165,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -142,22 +131,22 @@ class _FoodCardState extends State<FoodCard> {
                     _ImageBadge(
                       icon: Icons.star_rounded,
                       iconColor: Colors.amber,
-                      label: widget.rating,
+                      label: widget.item.rating,
                     ),
-                    if (widget.deliveryTime != null) ...[
+                    if (widget.item.deliveryTime != null) ...[
                       const SizedBox(width: 6),
                       _ImageBadge(
                         icon: Icons.access_time_rounded,
                         iconColor: Colors.white,
-                        label: widget.deliveryTime!,
+                        label: widget.item.deliveryTime!,
                       ),
                     ],
-                    if (widget.distance != null) ...[
+                    if (widget.item.distance != null) ...[
                       const SizedBox(width: 6),
                       _ImageBadge(
                         icon: Icons.near_me_rounded,
                         iconColor: Colors.white,
-                        label: widget.distance!,
+                        label: widget.item.distance!,
                       ),
                     ],
                   ],
@@ -177,7 +166,7 @@ class _FoodCardState extends State<FoodCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.title,
+                        widget.item.title,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -187,7 +176,7 @@ class _FoodCardState extends State<FoodCard> {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        widget.description,
+                        widget.item.description,
                         style: TextStyle(
                           fontSize: 12.5,
                           color: Colors.grey[500],
@@ -206,7 +195,7 @@ class _FoodCardState extends State<FoodCard> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      widget.price,
+                      widget.item.price,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -215,30 +204,39 @@ class _FoodCardState extends State<FoodCard> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF4912),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.add_rounded, color: Colors.white, size: 14),
-                            SizedBox(width: 3),
-                            Text(
-                              'Add',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
+                    Consumer(
+                      builder: (context, ref, child) {
+                        return GestureDetector(
+                          onTap: () {
+                            ref.read(cartProvider.notifier).addItem(widget.item);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF4912),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add_rounded, color: Colors.white, size: 14),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    'Add',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
