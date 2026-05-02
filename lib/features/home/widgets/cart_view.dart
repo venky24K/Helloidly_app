@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/home_providers.dart';
+import '../../order/presentation/checkout_screen.dart';
 
 class CartView extends ConsumerWidget {
   const CartView({super.key});
@@ -142,7 +143,10 @@ class CartView extends ConsumerWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Checkout logic
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CheckoutScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF4912),

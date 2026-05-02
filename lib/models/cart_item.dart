@@ -19,6 +19,20 @@ class CartItem {
     );
   }
 
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      foodItem: FoodItem.fromJson(json['food_item']),
+      quantity: json['quantity'] ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'food_item': foodItem.toJson(),
+      'quantity': quantity,
+    };
+  }
+
   double get totalPrice {
     // Basic price parsing for mock data. In a real app, price should be a double.
     final priceStr = foodItem.price.replaceAll('₹', '').trim();

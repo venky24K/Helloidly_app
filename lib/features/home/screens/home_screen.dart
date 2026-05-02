@@ -8,9 +8,13 @@ import '../widgets/home_filters.dart';
 import '../widgets/food_card.dart';
 import '../widgets/floating_nav_bar.dart';
 import '../providers/home_providers.dart';
+import '../../order/providers/order_providers.dart';
+import '../widgets/active_order_card.dart';
 
 import '../widgets/cart_view.dart';
+import '../widgets/orders_view.dart';
 import '../widgets/proceed_to_cart_bar.dart';
+import '../../profile/widgets/profile_view.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -84,28 +88,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: HomeFilters(),
                     ),
                   ),
-                  SliverPadding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 140),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return FoodCard(item: foodItems[index]);
-                        },
-                        childCount: foodItems.length,
+                  foodItems.when(
+                    data: (items) => SliverPadding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 140),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return FoodCard(item: items[index]);
+                          },
+                          childCount: items.length,
+                        ),
                       ),
+                    ),
+                    loading: () => const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (err, stack) => SliverToBoxAdapter(
+                      child: Center(child: Text('Error: $err')),
                     ),
                   ),
                 ],
               ),
               // Search Tab (Placeholder)
               const Center(child: Text('Search Content')),
-              // Orders Tab (Placeholder)
-              const Center(child: Text('Orders Content')),
+              // Orders Tab
+              const OrdersView(),
               // Cart Tab
               const CartView(),
+              // Profile Tab
+              const ProfileView(),
             ],
           ),
-          if (showProceedBar)
+          if (ref.watch(activeOrdersProvider).isNotEmpty && currentIndex == 0)
+            ActiveOrderCard(order: ref.watch(activeOrdersProvider).first)
+          else if (showProceedBar && currentIndex != 4)
             const ProceedToCartBar()
           else
             FloatingNavBar(isVisible: isNavVisible),

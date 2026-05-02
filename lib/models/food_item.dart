@@ -44,4 +44,32 @@ class FoodItem {
       distance: distance ?? this.distance,
     );
   }
+
+  factory FoodItem.fromJson(Map<String, dynamic> json) {
+    return FoodItem(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      price: json['price'] ?? '',
+      rating: json['rating']?.toString() ?? '0.0',
+      imageUrl: json['image_url'] ?? '',
+      isFavorite: json['is_favorite'] ?? false,
+      deliveryTime: json['delivery_time'],
+      distance: json['distance'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'price': price,
+      'rating': rating,
+      'image_url': imageUrl,
+      'is_favorite': isFavorite,
+      'delivery_time': deliveryTime,
+      'distance': distance,
+    };
+  }
 }

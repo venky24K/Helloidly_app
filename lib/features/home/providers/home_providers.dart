@@ -1,6 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/food_item.dart';
 import '../../../models/cart_item.dart';
+import '../../../services/supabase_service.dart';
+
+// Provider for the supabase service
+final supabaseServiceProvider = Provider<SupabaseService>((ref) {
+  return SupabaseService();
+});
 
 // Provider for the selected navigation index
 final navigationIndexProvider = StateProvider<int>((ref) => 0);
@@ -8,41 +14,10 @@ final navigationIndexProvider = StateProvider<int>((ref) => 0);
 // Provider for the navigation bar visibility
 final navBarVisibilityProvider = StateProvider<bool>((ref) => true);
 
-// Provider for food items (mock data)
-final foodItemsProvider = Provider<List<FoodItem>>((ref) {
-  return [
-    FoodItem(
-      id: '1',
-      title: 'Ghee Roast Idly (4 Pcs)',
-      description: 'Soft and fluffy idlies roasted in pure cow ghee, served with spicy red chutney and sambar.',
-      price: '₹120',
-      rating: '4.8',
-      imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800',
-      isFavorite: true,
-      deliveryTime: '20-25 min',
-      distance: '2.5 km',
-    ),
-    FoodItem(
-      id: '2',
-      title: 'Butter Masala Dosa',
-      description: 'Crispy golden dosa filled with spiced potato masala and topped with fresh butter.',
-      price: '₹140',
-      rating: '4.9',
-      imageUrl: 'https://images.unsplash.com/photo-1630383249896-424e482df921?w=800',
-      deliveryTime: '15-20 min',
-      distance: '1.8 km',
-    ),
-    FoodItem(
-      id: '3',
-      title: 'Medu Vada (2 Pcs)',
-      description: 'Crispy deep-fried lentil donuts served with coconut chutney and piping hot sambar.',
-      price: '₹90',
-      rating: '4.7',
-      imageUrl: 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?w=800',
-      deliveryTime: '25-30 min',
-      distance: '3.2 km',
-    ),
-  ];
+// Provider for food items from Supabase
+final foodItemsProvider = FutureProvider<List<FoodItem>>((ref) async {
+  final supabaseService = ref.watch(supabaseServiceProvider);
+  return await supabaseService.getFoodItems();
 });
 
 // Cart Notifier to manage cart operations

@@ -1,0 +1,57 @@
+class UserModel {
+  final String id;
+  final String name;
+  final String email;
+  final String phone;
+  final String profileImageUrl;
+  final String address;
+
+  UserModel({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.profileImageUrl,
+    required this.address,
+  });
+
+  UserModel copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? phone,
+    String? profileImageUrl,
+    String? address,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      address: address ?? this.address,
+    );
+  }
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      profileImageUrl: json['profile_image_url'] ?? '',
+      address: json['address'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'profile_image_url': profileImageUrl,
+      'address': address,
+    };
+  }
+}
