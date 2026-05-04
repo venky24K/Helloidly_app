@@ -25,7 +25,7 @@ class ProfileIcons extends ConsumerWidget {
           backgroundColor: Colors.white24,
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
-        error: (_, __) => const CircleAvatar(
+        error: (_, _) => const CircleAvatar(
           radius: 22,
           backgroundColor: Colors.white24,
           child: Icon(Icons.person_outline, color: Colors.white),

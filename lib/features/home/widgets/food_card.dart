@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../models/food_item.dart';
 import '../providers/home_providers.dart';
 
@@ -52,16 +53,24 @@ class _FoodCardState extends State<FoodCard> {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.network(
-                  widget.item.imageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: widget.item.imageUrl,
                   height: 165,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  placeholder: (context, url) => Container(
                     height: 165,
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 165,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
                     ),
                     child: Center(
                       child: Icon(Icons.fastfood_rounded, size: 44, color: Colors.grey[350]),
@@ -141,14 +150,6 @@ class _FoodCardState extends State<FoodCard> {
                         label: widget.item.deliveryTime!,
                       ),
                     ],
-                    if (widget.item.distance != null) ...[
-                      const SizedBox(width: 6),
-                      _ImageBadge(
-                        icon: Icons.near_me_rounded,
-                        iconColor: Colors.white,
-                        label: widget.item.distance!,
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -195,7 +196,7 @@ class _FoodCardState extends State<FoodCard> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      widget.item.price,
+                      '₹${widget.item.price}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,

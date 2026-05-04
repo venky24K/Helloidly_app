@@ -70,45 +70,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             index: currentIndex,
             children: [
               // Home Tab
-              CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  const SliverToBoxAdapter(
-                    child: HomeHeader(),
+          RefreshIndicator(
+            onRefresh: () async {
+              return ref.refresh(foodItemsProvider.future);
+            },
+            color: const Color(0xFFFF4912),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: HomeHeader(),
+                ),
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: TiffinCategories(),
                   ),
-                  const SliverPadding(
-                    padding: EdgeInsets.only(top: 16),
-                    sliver: SliverToBoxAdapter(
-                      child: TiffinCategories(),
-                    ),
+                ),
+                const SliverPadding(
+                  padding: EdgeInsets.only(top: 8),
+                  sliver: SliverToBoxAdapter(
+                    child: HomeFilters(),
                   ),
-                  const SliverPadding(
-                    padding: EdgeInsets.only(top: 8),
-                    sliver: SliverToBoxAdapter(
-                      child: HomeFilters(),
-                    ),
-                  ),
-                  foodItems.when(
-                    data: (items) => SliverPadding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 140),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            return FoodCard(item: items[index]);
-                          },
-                          childCount: items.length,
-                        ),
+                ),
+                foodItems.when(
+                  data: (items) => SliverPadding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 140),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return FoodCard(item: items[index]);
+                        },
+                        childCount: items.length,
                       ),
                     ),
-                    loading: () => const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                    error: (err, stack) => SliverToBoxAdapter(
-                      child: Center(child: Text('Error: $err')),
-                    ),
                   ),
-                ],
-              ),
+                  loading: () => const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, stack) => SliverToBoxAdapter(
+                    child: Center(child: Text('Error: $err')),
+                  ),
+                ),
+              ],
+            ),
+          ),
               // Search Tab (Placeholder)
               const Center(child: Text('Search Content')),
               // Orders Tab

@@ -2,7 +2,7 @@ class FoodItem {
   final String id;
   final String title;
   final String description;
-  final String price;
+  final int price;
   final String rating;
   final String imageUrl;
   final bool isFavorite;
@@ -25,7 +25,7 @@ class FoodItem {
     String? id,
     String? title,
     String? description,
-    String? price,
+    int? price,
     String? rating,
     String? imageUrl,
     bool? isFavorite,
@@ -46,11 +46,20 @@ class FoodItem {
   }
 
   factory FoodItem.fromJson(Map<String, dynamic> json) {
+    // Handle price being String or int from JSON
+    int parsedPrice = 0;
+    if (json['price'] is int) {
+      parsedPrice = json['price'];
+    } else if (json['price'] is String) {
+      final priceStr = json['price'].replaceAll('₹', '').trim();
+      parsedPrice = int.tryParse(priceStr) ?? 0;
+    }
+
     return FoodItem(
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      price: json['price'] ?? '',
+      price: parsedPrice,
       rating: json['rating']?.toString() ?? '0.0',
       imageUrl: json['image_url'] ?? '',
       isFavorite: json['is_favorite'] ?? false,

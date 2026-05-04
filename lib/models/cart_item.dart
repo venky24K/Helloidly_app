@@ -34,9 +34,6 @@ class CartItem {
   }
 
   double get totalPrice {
-    // Basic price parsing for mock data. In a real app, price should be a double.
-    final priceStr = foodItem.price.replaceAll('₹', '').trim();
-    final price = double.tryParse(priceStr) ?? 0.0;
-    return price * quantity;
+    return (foodItem.price * quantity).toDouble();
   }
 }

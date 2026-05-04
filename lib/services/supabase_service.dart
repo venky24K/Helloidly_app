@@ -46,7 +46,7 @@ class SupabaseService {
   }
 
   Future<void> createOrder(OrderModel order, String userId) async {
-    final orderData = order.toJson();
+    final orderData = order.toJson(forInsert: true);
     orderData['user_id'] = userId;
     await _client.from('orders').insert(orderData);
   }

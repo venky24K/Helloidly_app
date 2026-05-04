@@ -9,7 +9,7 @@ class CartView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
-    final totalAmount = ref.read(cartProvider.notifier).totalAmount;
+    final totalAmount = ref.watch(cartTotalProvider);
 
     if (cartItems.isEmpty) {
       return const Center(
@@ -81,7 +81,7 @@ class CartView extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            item.foodItem.price,
+                            '₹${item.foodItem.price}',
                             style: const TextStyle(color: Color(0xFFFF4912), fontWeight: FontWeight.bold),
                           ),
                         ],

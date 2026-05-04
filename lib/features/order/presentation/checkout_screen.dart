@@ -4,11 +4,18 @@ import '../../home/providers/home_providers.dart';
 import '../providers/order_providers.dart';
 import 'order_success_screen.dart';
 
-class CheckoutScreen extends ConsumerWidget {
+class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
+}
+
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+  bool _isPlacingOrder = false;
+
+  @override
+  Widget build(BuildContext context) {
     final cartItems = ref.watch(cartProvider);
     final totalAmount = ref.watch(cartTotalProvider);
     const deliveryFee = 40.0;
@@ -153,16 +160,16 @@ class CheckoutScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: Row(
+              child: const Row(
                 children: [
-                  const Icon(Icons.payment, color: Colors.blue),
-                  const SizedBox(width: 16),
-                  const Text(
+                  Icon(Icons.payment, color: Colors.blue),
+                  SizedBox(width: 16),
+                  Text(
                     'Google Pay / UPI',
                     style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
                   ),
-                  const Spacer(),
-                  const Icon(Icons.check_circle, color: Color(0xFFFF4912)),
+                  Spacer(),
+                  Icon(Icons.check_circle, color: Color(0xFFFF4912)),
                 ],
               ),
             ),
@@ -221,32 +228,69 @@ class CheckoutScreen extends ConsumerWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: () {
-            ref.read(placeOrderProvider)(
-              cartItems,
-              deliveryFee,
-              taxes,
-              'Home - Gokul Garden, Bangalore',
-            );
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const OrderSuccessScreen()),
-            );
-          },
+          onPressed: _isPlacingOrder ? null : _handlePlaceOrder,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFF4912),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 0,
+            disabledBackgroundColor: const Color(0xFFFF4912).withValues(alpha: 0.6),
           ),
-          child: const Text(
-            'Place Order',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          child: _isPlacingOrder
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  'Place Order',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
         ),
       ),
     );
+  }
+
+  Future<void> _handlePlaceOrder() async {
+    setState(() => _isPlacingOrder = true);
+
+    try {
+      final cartItems = ref.read(cartProvider);
+      const deliveryFee = 40.0;
+      final totalAmount = ref.read(cartTotalProvider);
+      final taxes = totalAmount * 0.05;
+
+      await ref.read(placeOrderProvider)(
+        cartItems,
+        deliveryFee,
+        taxes,
+        'Home - Gokul Garden, Bangalore',
+      );
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const OrderSuccessScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to place order: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPlacingOrder = false);
+      }
+    }
   }
 
   Widget _buildSectionTitle(String title) {

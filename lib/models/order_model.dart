@@ -73,9 +73,9 @@ class OrderModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({bool forInsert = false}) {
     return {
-      'id': id,
+      if (!forInsert) 'id': id,
       'items': items.map((i) => i.toJson()).toList(),
       'total_amount': totalAmount,
       'delivery_fee': deliveryFee,
