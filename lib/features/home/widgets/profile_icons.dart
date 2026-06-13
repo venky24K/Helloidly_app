@@ -18,7 +18,8 @@ class ProfileIcons extends ConsumerWidget {
         data: (user) => CircleAvatar(
           radius: 22,
           backgroundColor: Colors.white24,
-          backgroundImage: NetworkImage(user.profileImageUrl),
+          backgroundImage: user != null ? NetworkImage(user.profileImageUrl) : null,
+          child: user == null ? const Icon(Icons.person_outline, color: Colors.white) : null,
         ),
         loading: () => const CircleAvatar(
           radius: 22,

@@ -1,13 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/user_model.dart';
 import '../../home/providers/home_providers.dart';
+import '../../auth/providers/auth_providers.dart';
 
-final userProvider = FutureProvider<UserModel>((ref) async {
+final userProvider = FutureProvider<UserModel?>((ref) async {
   final supabaseService = ref.watch(supabaseServiceProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(userIdProvider);
   
-  // For demonstration, if no user is logged in, we try to fetch profile '1'
-  // In production, you would redirect to login or handle unauthenticated state.
-  return await supabaseService.getUserProfile(userId ?? '1');
+  if (userId == null) {
+    return null;
+  }
+  
+  try {
+    return await supabaseService.getUserProfile(userId);
+  } catch (e) {
+    // If user profile doesn't exist yet, we could return a default or rethrow
+    rethrow;
+  }
 });

@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/order_model.dart';
 import '../../../models/cart_item.dart';
 import '../../home/providers/home_providers.dart';
 import '../../../services/supabase_service.dart';
+import '../../auth/providers/auth_providers.dart';
 
 class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
   final SupabaseService _supabaseService;
@@ -48,7 +48,10 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
     );
 
     try {
-      await _supabaseService.createOrder(newOrder, _userId ?? '1');
+      if (_userId == null) {
+        throw Exception('User must be logged in to place an order');
+      }
+      await _supabaseService.createOrder(newOrder, _userId);
       await fetchOrders(); // Refresh orders list
     } catch (e) {
       // Handle error
@@ -57,10 +60,11 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
   }
 }
 
+
 final ordersProvider = StateNotifierProvider<OrderNotifier, AsyncValue<List<OrderModel>>>((ref) {
   final supabaseService = ref.watch(supabaseServiceProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
-  return OrderNotifier(supabaseService, userId ?? '1');
+  final userId = ref.watch(userIdProvider);
+  return OrderNotifier(supabaseService, userId);
 });
 
 // Provider for active orders

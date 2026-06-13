@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/profile_providers.dart';
+import '../../auth/presentation/signin_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileView extends ConsumerWidget {
   const ProfileView({super.key});
@@ -12,74 +14,79 @@ class ProfileView extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: userAsync.when(
-        data: (user) => CustomScrollView(
-          slivers: [
-            _buildSliverAppBar(context, user),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle('Account Settings'),
-                    const SizedBox(height: 16),
-                    _buildMenuItem(
-                      icon: Icons.person_outline_rounded,
-                      title: 'Edit Profile',
-                      subtitle: 'Name, Email, Phone number',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.location_on_outlined,
-                      title: 'My Addresses',
-                      subtitle: 'Home, Office, Other locations',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.payment_rounded,
-                      title: 'Payment Methods',
-                      subtitle: 'Cards, UPI, Wallets',
-                      onTap: () {},
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Preferences'),
-                    const SizedBox(height: 16),
-                    _buildMenuItem(
-                      icon: Icons.notifications_none_rounded,
-                      title: 'Notifications',
-                      subtitle: 'Order updates, Offers, News',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.language_rounded,
-                      title: 'Language',
-                      subtitle: 'English',
-                      onTap: () {},
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Support'),
-                    const SizedBox(height: 16),
-                    _buildMenuItem(
-                      icon: Icons.help_outline_rounded,
-                      title: 'Help Center',
-                      subtitle: 'FAQs, Customer support',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.info_outline_rounded,
-                      title: 'About Helloidly',
-                      subtitle: 'Privacy policy, Terms of service',
-                      onTap: () {},
-                    ),
-                    const SizedBox(height: 40),
-                    _buildLogoutButton(),
-                    const SizedBox(height: 100), // Space for bottom nav
-                  ],
+        data: (user) {
+          if (user == null) {
+            return _buildGuestView(context);
+          }
+          return CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context, user),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle('Account Settings'),
+                      const SizedBox(height: 16),
+                      _buildMenuItem(
+                        icon: Icons.person_outline_rounded,
+                        title: 'Edit Profile',
+                        subtitle: 'Name, Email, Phone number',
+                        onTap: () {},
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.location_on_outlined,
+                        title: 'My Addresses',
+                        subtitle: 'Home, Office, Other locations',
+                        onTap: () {},
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.payment_rounded,
+                        title: 'Payment Methods',
+                        subtitle: 'Cards, UPI, Wallets',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle('Preferences'),
+                      const SizedBox(height: 16),
+                      _buildMenuItem(
+                        icon: Icons.notifications_none_rounded,
+                        title: 'Notifications',
+                        subtitle: 'Order updates, Offers, News',
+                        onTap: () {},
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.language_rounded,
+                        title: 'Language',
+                        subtitle: 'English',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle('Support'),
+                      const SizedBox(height: 16),
+                      _buildMenuItem(
+                        icon: Icons.help_outline_rounded,
+                        title: 'Help Center',
+                        subtitle: 'FAQs, Customer support',
+                        onTap: () {},
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.info_outline_rounded,
+                        title: 'About Helloidly',
+                        subtitle: 'Privacy policy, Terms of service',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 40),
+                      _buildLogoutButton(ref),
+                      const SizedBox(height: 100), // Space for bottom nav
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error loading profile: $err')),
       ),
@@ -205,7 +212,9 @@ class ProfileView extends ConsumerWidget {
     );
   }
 
-  Widget _buildLogoutButton() {
+
+
+  Widget _buildLogoutButton(WidgetRef ref) {
     return Container(
       width: double.infinity,
       height: 56,
@@ -214,7 +223,9 @@ class ProfileView extends ConsumerWidget {
         border: Border.all(color: const Color(0xFFFF4912).withValues(alpha: 0.3)),
       ),
       child: TextButton.icon(
-        onPressed: () {},
+        onPressed: () {
+          FirebaseAuth.instance.signOut();
+        },
         icon: const Icon(Icons.logout_rounded, color: Color(0xFFFF4912)),
         label: const Text(
           'Logout',
@@ -224,6 +235,67 @@ class ProfileView extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGuestView(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF4912).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              size: 64,
+              color: Color(0xFFFF4912),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Welcome to Helloidly!',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Log in to view your profile and manage orders',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SigninScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF4912),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Login / Signup',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
     );
   }

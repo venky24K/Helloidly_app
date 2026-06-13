@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../order/providers/order_providers.dart';
+import '../../auth/presentation/signin_screen.dart';
 import '../../../models/order_model.dart';
 import 'package:intl/intl.dart';
+
+import '../../auth/providers/auth_providers.dart';
 
 class OrdersView extends ConsumerWidget {
   const OrdersView({super.key});
@@ -26,6 +29,10 @@ class OrdersView extends ConsumerWidget {
         Expanded(
           child: ordersAsync.when(
             data: (orders) {
+              final userId = ref.watch(userIdProvider);
+              if (userId == null) {
+                return _buildLoginPrompt(context);
+              }
               if (orders.isEmpty) {
                 return const Center(
                   child: Column(
@@ -55,6 +62,68 @@ class OrdersView extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLoginPrompt(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF4912).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.receipt_long_outlined,
+              size: 64,
+              color: Color(0xFFFF4912),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Track your orders',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Please log in to see your order history\nand track active deliveries',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SigninScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF4912),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Login to Continue',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
